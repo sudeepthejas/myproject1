@@ -1,0 +1,35 @@
+---
+- hosts : DEV
+  become: yes
+  become_user : root
+  become_method: sudo
+  vars : 
+   Modjk_url : 
+    tasks : 
+     - name : create a Modjk_dir variable 
+       shell : echo "{{Modjk_url}} awk -F '{print $NF}' | SED -E 's/.tar.gz//g'
+       register : output 
+
+     - name : create modjk_dir using setfact 
+       set_fact : 
+        Modjk_home_dir : "{{output.stdout}}"
+
+     - name : print the the Modjk_home_dir 
+       debug : 
+        msg : "{{Modjk_home_dir}}" 
+
+
+      - name : download httpd 
+         yum : 
+          name : "{{item}}"
+          state : latest
+         with_items : 
+          - httpd 
+          - httpd-devel
+          - gcc 
+
+       - name : start the service 
+          service : 
+           name : httpd 
+           state : started 
+
